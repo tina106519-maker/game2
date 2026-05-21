@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🕵️ 網路安全小偵探 — 遊戲中獎詐騙辨識</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-50: #EAF3DE;
+      --green-100: #C0DD97;
+      --green-600: #3B6D11;
+      --green-700: #27500A;
+      --green-900: #173404;
+      --red-50: #FCEBEB;
+      --red-200: #F09595;
+      --red-600: #E24B4A;
+      --red-900: #501313;
+      --amber-50: #FAEEDA;
+      --amber-600: #854F0B;
+      --gray-50: #F8F7F2;
+      --gray-100: #EFEFEA;
+      --gray-200: #D3D1C7;
+      --gray-600: #5F5E5A;
+      --gray-900: #2C2C2A;
+      --blue-50: #E6F1FB;
+      --blue-600: #185FA5;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.07);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.10);
+    }
+
+    body {
+      font-family: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+      background: linear-gradient(135deg, #f0f7e8 0%, #e8f0fb 50%, #fdf3e8 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+      color: var(--gray-900);
+    }
+
+    #game {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .game-logo {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 15px; font-weight: 600; color: var(--green-600);
+    }
+    .game-logo .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--green-600);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .score-badge {
+      background: #fff;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 99px;
+      padding: 5px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--green-600);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* SCREENS */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* CARD WRAPPER */
+    .card {
+      background: #fff;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      padding: 2rem 1.75rem;
+      margin-bottom: 1rem;
+    }
+
+    /* START SCREEN */
+    .start-hero { text-align: center; }
+    .hero-emoji-wrap {
+      width: 100px; height: 100px;
+      background: linear-gradient(135deg, var(--green-50), #d8efc8);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 52px;
+      box-shadow: 0 0 0 8px rgba(59,109,17,0.08);
+    }
+    .start-hero h1 {
+      font-size: 24px; font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 0.6rem;
+      line-height: 1.4;
+    }
+    .start-hero h1 span { color: var(--green-600); }
+    .start-hero .subtitle {
+      font-size: 15px; color: var(--gray-600);
+      line-height: 1.7; margin-bottom: 1.75rem;
+    }
+    .mission-list {
+      background: var(--gray-50);
+      border-radius: var(--radius-md);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.75rem;
+      text-align: left;
+    }
+    .mission-list p {
+      font-size: 14px; color: var(--gray-900);
+      padding: 5px 0; line-height: 1.55;
+    }
+    .mission-list p + p { border-top: 1px solid var(--gray-100); }
+    .mission-list .num {
+      display: inline-block;
+      background: var(--green-600); color: #fff;
+      border-radius: 50%; width: 20px; height: 20px;
+      font-size: 11px; font-weight: 700;
+      line-height: 20px; text-align: center;
+      margin-right: 8px;
+    }
+    .btn-start {
+      display: inline-block;
+      background: var(--green-600);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 14px 40px;
+      font-size: 16px; font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(59,109,17,0.25);
+    }
+    .btn-start:hover { background: var(--green-700); transform: translateY(-1px); }
+    .btn-start:active { transform: translateY(0); }
+
+    /* PROGRESS */
+    .progress-section { margin-bottom: 1.25rem; }
+    .progress-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .progress-label { font-size: 13px; font-weight: 600; color: var(--green-600); }
+    .star-row { font-size: 16px; letter-spacing: 3px; }
+    .progress-track {
+      height: 8px;
+      background: var(--gray-100);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-600), #7cbd3a);
+      border-radius: 99px;
+      transition: width 0.5s ease;
+    }
+
+    /* PHONE FRAME */
+    .phone-wrap {
+      display: flex; justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .phone-frame {
+      background: #1c1c2e;
+      border-radius: 28px;
+      padding: 12px;
+      width: 300px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22), 0 0 0 2px #3a3a5a;
+    }
+    .phone-notch {
+      width: 80px; height: 18px;
+      background: #1c1c2e;
+      border-radius: 10px;
+      margin: 0 auto 8px;
+      position: relative;
+    }
+    .phone-notch::after {
+      content: '';
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #2a2a3e;
+      position: absolute; top: 4px; right: 16px;
+    }
+    .phone-screen {
+      background: #f0f4ff;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .msg-header-bar {
+      background: #25D366;
+      color: #fff;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .msg-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .msg-sender { font-size: 13px; font-weight: 600; }
+    .msg-status { font-size: 10px; opacity: .75; }
+    .msg-body { padding: 12px 10px; }
+    .bubble {
+      background: #fff;
+      border-radius: 4px 14px 14px 14px;
+      padding: 10px 12px;
+      font-size: 13px; line-height: 1.65;
+      color: #1a1a1a;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .bubble b.red { color: #C62828; }
+    .bubble .prize { color: #E65100; font-weight: 700; }
+    .bubble-btn {
+      display: block;
+      margin: 10px auto 0;
+      background: #FF5722;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 13px; font-weight: 600;
+      cursor: default;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* EMAIL FRAME */
+    .email-frame {
+      background: #fff;
+      border: 1px solid #dce3ef;
+      border-radius: 14px;
+      overflow: hidden;
+      max-width: 360px;
+      margin: 0 auto 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .email-toolbar {
+      background: #1a73e8;
+      color: #fff;
+      padding: 9px 14px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600;
+    }
+    .email-meta {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 12px; color: #555; line-height: 1.7;
+    }
+    .email-meta b { color: #222; }
+    .email-meta .warn { color: #C62828; font-weight: 700; }
+    .email-body {
+      padding: 13px 14px;
+      font-size: 13px; color: #1a1a1a; line-height: 1.7;
+    }
+    .email-body b { color: #C62828; }
+    .fake-link {
+      color: #1a73e8; text-decoration: underline;
+      font-size: 12px; word-break: break-all;
+    }
+
+    /* POPUP FRAME */
+    .popup-wrap {
+      display: flex; justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .popup-frame {
+      background: #fff;
+      border: 2.5px solid #FF6F00;
+      border-radius: 16px;
+      width: 300px;
+      overflow: hidden;
+      box-shadow: 0 8px 28px rgba(255,111,0,0.18);
+    }
+    .popup-hdr {
+      background: linear-gradient(90deg, #FF6F00, #ffab40);
+      color: #fff;
+      padding: 10px 14px;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .popup-body {
+      padding: 16px 14px;
+      text-align: center;
+    }
+    .popup-body p { font-size: 13px; color: #333; line-height: 1.6; }
+    .prize-amt {
+      font-size: 30px; font-weight: 800;
+      color: #E65100;
+      margin: 8px 0;
+      letter-spacing: -1px;
+    }
+    .popup-note { font-size: 11px; color: #888; margin-bottom: 10px; }
+    .popup-btns { display: flex; gap: 8px; }
+    .popup-yes {
+      flex: 1; background: linear-gradient(135deg,#FF6F00,#ffab40);
+      color: #fff; border: none; border-radius: 8px;
+      padding: 10px; font-size: 13px; font-weight: 700; cursor: default;
+    }
+    .popup-no {
+      flex: 0 0 70px; background: #eee; color: #bbb;
+      border: none; border-radius: 8px;
+      padding: 10px; font-size: 10px; cursor: default;
+    }
+
+    /* QUESTION CARD */
+    .q-card {
+      background: var(--gray-50);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      border: 1.5px solid var(--gray-100);
+    }
+    .q-label {
+      font-size: 11px; font-weight: 700;
+      color: var(--green-600); letter-spacing: 1px;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .q-text {
+      font-size: 16px; font-weight: 600;
+      color: var(--gray-900); line-height: 1.55;
+      margin-bottom: 1rem;
+    }
+    .choices { display: flex; flex-direction: column; gap: 10px; }
+    .choice-btn {
+      background: #fff;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-md);
+      padding: 13px 16px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--gray-900);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+    .choice-btn:hover:not(:disabled) {
+      background: var(--green-50);
+      border-color: #7cbd3a;
+      color: var(--green-700);
+    }
+    .choice-btn.correct {
+      background: var(--green-50) !important;
+      border-color: var(--green-600) !important;
+      color: var(--green-700) !important;
+      font-weight: 700;
+    }
+    .choice-btn.wrong {
+      background: var(--red-50) !important;
+      border-color: var(--red-600) !important;
+      color: var(--red-900) !important;
+    }
+    .choice-btn.selected {
+      background: #EAF3DE;
+      border-color: #639922;
+      color: var(--green-700);
+    }
+    .hint-text {
+      font-size: 12px; color: var(--gray-600);
+      margin-top: 10px; font-style: italic;
+    }
+
+    /* FEEDBACK */
+    .feedback {
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      font-size: 14px; line-height: 1.65;
+      margin-bottom: 1rem;
+      display: none;
+      border-left: 4px solid;
+    }
+    .feedback.show { display: block; }
+    .feedback.good {
+      background: var(--green-50); color: var(--green-900);
+      border-color: var(--green-600);
+    }
+    .feedback.bad {
+      background: var(--red-50); color: var(--red-900);
+      border-color: var(--red-600);
+    }
+
+    /* NAV BUTTONS */
+    .btn-next {
+      display: none;
+      background: var(--green-600);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 13px 28px;
+      font-size: 15px; font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 3px 10px rgba(59,109,17,0.2);
+    }
+    .btn-next.show { display: inline-block; }
+    .btn-next:hover { background: var(--green-700); }
+    .btn-confirm {
+      background: var(--gray-900);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 11px 22px;
+      font-size: 14px; font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 12px;
+    }
+    .btn-confirm:hover { background: #000; }
+
+    /* RESULT */
+    .result-top { text-align: center; margin-bottom: 1.5rem; }
+    .result-badge { font-size: 72px; line-height: 1; margin-bottom: 12px; }
+    .result-title {
+      font-size: 22px; font-weight: 800;
+      color: var(--gray-900); margin-bottom: 8px;
+    }
+    .result-msg {
+      font-size: 15px; color: var(--gray-600);
+      line-height: 1.65;
+    }
+    .score-display {
+      background: linear-gradient(135deg, var(--green-50), #d0eaac);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      text-align: center;
+      margin: 1.25rem 0;
+      border: 1.5px solid #b5d97a;
+    }
+    .score-num {
+      font-size: 40px; font-weight: 800;
+      color: var(--green-600); line-height: 1;
+    }
+    .score-denom { font-size: 22px; color: var(--green-700); }
+    .score-label { font-size: 13px; color: var(--green-700); margin-top: 4px; }
+    .tips-box {
+      background: #fff;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .tips-box h3 {
+      font-size: 14px; font-weight: 700;
+      color: var(--gray-900); margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .tip-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 7px 0;
+      font-size: 14px; line-height: 1.55; color: var(--gray-900);
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .tip-row:last-child { border-bottom: none; }
+    .tip-icon {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--red-50);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .mantra {
+      background: var(--amber-50);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 14px; font-weight: 700;
+      color: var(--amber-600);
+      text-align: center;
+      margin-bottom: 1.5rem;
+      border: 1.5px solid #FAC775;
+    }
+    .btn-restart {
+      display: block; width: 100%;
+      background: var(--green-600);
+      color: #fff; border: none;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      font-size: 16px; font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 4px 14px rgba(59,109,17,0.22);
+    }
+    .btn-restart:hover { background: var(--green-700); }
+
+    /* SCENE TITLE */
+    .scene-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--gray-600); letter-spacing: 0.5px;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .scene-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green-600);
+      display: inline-block;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 1.5rem 1.25rem; }
+      .phone-frame { width: 260px; }
+    }
+  </style>
+</head>
+<body>
+<div id="game">
+
+  <div class="top-bar">
+    <div class="game-logo">
+      <div class="logo-icon">🕵️</div>
+      <span>網路安全小偵探</span>
+    </div>
+    <div class="score-badge" id="score-display">⭐ 0 分</div>
+  </div>
+
+  <!-- ===== START ===== -->
+  <div class="screen active" id="screen-start">
+    <div class="card">
+      <div class="start-hero">
+        <div class="hero-emoji-wrap">🕵️</div>
+        <h1>你能識破<br><span>遊戲中獎詐騙</span>嗎？</h1>
+        <p class="subtitle">詐騙集團常常假裝你「中大獎」，<br>騙你的錢和個人資料！<br>3 道關卡，測試你的偵探眼力！</p>
+        <div class="mission-list">
+          <p><span class="num">1</span>辨識假的手機中獎訊息</p>
+          <p><span class="num">2</span>找出釣魚詐騙電子郵件的漏洞</p>
+          <p><span class="num">3</span>知道遇到可疑彈窗該怎麼做</p>
+        </div>
+        <button class="btn-start" onclick="startGame()">🚀 開始挑戰</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 1 ===== -->
+  <div class="screen" id="screen-1">
+    <div class="card">
+      <div class="progress-section">
+        <div class="progress-meta">
+          <span class="progress-label">關卡 1 / 3 — 手機訊息</span>
+          <span class="star-row" id="stars-1">⭐⭐⭐</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:33%"></div>
+        </div>
+      </div>
+
+      <div class="scene-title"><span class="scene-dot"></span>情境：你收到一則手機訊息</div>
+
+      <div class="phone-wrap">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="msg-header-bar">
+              <div class="msg-avatar">🛍️</div>
+              <div>
+                <div class="msg-sender">購物台官方通知</div>
+                <div class="msg-status">今天 14:32</div>
+              </div>
+            </div>
+            <div class="msg-body">
+              <div class="bubble">
+                🎊 恭喜你！你是本月<b class="red">第 1,000,000 位</b>會員！<br><br>
+                獎品：<span class="prize">iPhone 15 Pro + NT$50,000 購物金</span><br><br>
+                請在 <b class="red">10 分鐘內</b> 點選下方連結領獎，過時取消！<br><br>
+                ⚠️ 需先繳交「運費」<b class="red">NT$200</b> 才能出貨。
+              </div>
+              <button class="bubble-btn">立即領獎 👆</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <p class="q-label">🔍 偵探任務</p>
+        <p class="q-text">這則訊息最關鍵的可疑之處是什麼？</p>
+        <div class="choices" id="choices-1">
+          <button class="choice-btn" onclick="answer(1,0,false)">💬 訊息裡有很多表情符號</button>
+          <button class="choice-btn" onclick="answer(1,1,true)">💸 領「免費」獎品前要先付運費</button>
+          <button class="choice-btn" onclick="answer(1,2,false)">🎁 獎品太貴重了，感覺不真實</button>
+          <button class="choice-btn" onclick="answer(1,3,false)">⏰ 時間限制只有 10 分鐘</button>
+        </div>
+        <p class="hint-text">💡 提示：想想哪個選項揭露了詐騙最核心的手法？</p>
+      </div>
+
+      <div class="feedback" id="feedback-1"></div>
+      <button class="btn-next" id="next-1" onclick="goScene(2)">下一關 →</button>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 2 ===== -->
+  <div class="screen" id="screen-2">
+    <div class="card">
+      <div class="progress-section">
+        <div class="progress-meta">
+          <span class="progress-label">關卡 2 / 3 — 電子郵件</span>
+          <span class="star-row" id="stars-2">⭐⭐⭐</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:66%"></div>
+        </div>
+      </div>
+
+      <div class="scene-title"><span class="scene-dot"></span>情境：你收到一封奇怪的 email</div>
+
+      <div class="email-frame">
+        <div class="email-toolbar">
+          <i class="ti ti-mail"></i> 電子郵件
+        </div>
+        <div class="email-meta">
+          <b>寄件人：</b><span class="warn">service@go0gle-prize.xyz</span><br>
+          <b>主旨：</b>【重要】您中得年度大獎，請立即確認！
+        </div>
+        <div class="email-body">
+          親愛的用戶您好，<br><br>
+          您的帳號已被 <b>Google 總部</b> 抽中年度大獎！<br>
+          獎品：MacBook Pro + NT$100,000 現金！<br><br>
+          請在 24 小時內點擊下方連結，輸入您的<b>帳號密碼</b>及<b>身分證字號</b>進行資格驗證。<br><br>
+          <span class="fake-link">http://go0gle-prize.xyz/claim-now</span><br><br>
+          Google Taiwan 客服中心 敬上
+        </div>
+      </div>
+
+      <div class="q-card">
+        <p class="q-label">🔍 偵探任務（可多選）</p>
+        <p class="q-text">這封信有哪些可疑的地方？點選所有你找到的問題！</p>
+        <div class="choices" id="choices-2">
+          <button class="choice-btn" onclick="multiAnswer(0)">📧 寄件人的電子郵件地址很奇怪</button>
+          <button class="choice-btn" onclick="multiAnswer(1)">🔗 連結網址的拼字和真正的 Google 不同</button>
+          <button class="choice-btn" onclick="multiAnswer(2)">🔑 要求輸入密碼和身分證字號</button>
+          <button class="choice-btn" onclick="multiAnswer(3)">✅ 這封信是正常的，Google 真的會這樣通知</button>
+        </div>
+        <p class="hint-text">💡 提示：找出所有可疑的地方，再按「確認答案」</p>
+        <button class="btn-confirm" id="confirm-2" onclick="confirmMulti()">確認答案</button>
+      </div>
+
+      <div class="feedback" id="feedback-2"></div>
+      <button class="btn-next" id="next-2" onclick="goScene(3)">下一關 →</button>
+    </div>
+  </div>
+
+  <!-- ===== SCENE 3 ===== -->
+  <div class="screen" id="screen-3">
+    <div class="card">
+      <div class="progress-section">
+        <div class="progress-meta">
+          <span class="progress-label">關卡 3 / 3 — 彈跳視窗</span>
+          <span class="star-row" id="stars-3">⭐⭐⭐</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:100%"></div>
+        </div>
+      </div>
+
+      <div class="scene-title"><span class="scene-dot"></span>情境：玩遊戲時突然出現一個視窗</div>
+
+      <div class="popup-wrap">
+        <div class="popup-frame">
+          <div class="popup-hdr">
+            🎰 恭喜！你是今日幸運得獎者！
+          </div>
+          <div class="popup-body">
+            <p>你在玩遊戲期間被系統選中！</p>
+            <div class="prize-amt">NT$88,888</div>
+            <p>已存入您的帳戶！</p>
+            <p class="popup-note">請提供銀行帳號以確認收款</p>
+            <div class="popup-btns">
+              <button class="popup-yes">🎁 領取獎金</button>
+              <button class="popup-no">放棄<br>(確定嗎?)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <p class="q-label">🔍 偵探任務</p>
+        <p class="q-text">遇到這個視窗，你應該怎麼做？</p>
+        <div class="choices" id="choices-3">
+          <button class="choice-btn" onclick="answer(3,0,false)">🏃 趕快點「領取獎金」，怕時間過了就沒了</button>
+          <button class="choice-btn" onclick="answer(3,1,false)">🤔 先提供銀行帳號，看看是不是真的</button>
+          <button class="choice-btn" onclick="answer(3,2,true)">🛑 直接關掉視窗，告訴爸媽或老師</button>
+          <button class="choice-btn" onclick="answer(3,3,false)">📱 截圖傳給同學，問他們怎麼辦</button>
+        </div>
+        <p class="hint-text">💡 提示：遇到不確定的事情，最安全的做法是什麼？</p>
+      </div>
+
+      <div class="feedback" id="feedback-3"></div>
+      <button class="btn-next" id="next-3" onclick="showResult()">看看我的成績 →</button>
+    </div>
+  </div>
+
+  <!-- ===== RESULT ===== -->
+  <div class="screen" id="screen-result">
+    <div class="card">
+      <div class="result-top">
+        <div class="result-badge" id="result-badge">🏆</div>
+        <div class="result-title" id="result-title">超級安全小偵探！</div>
+        <p class="result-msg" id="result-msg">你的網路安全意識非常強！</p>
+      </div>
+
+      <div class="score-display">
+        <div>
+          <span class="score-num" id="score-num">5</span>
+          <span class="score-denom" id="score-denom"> / 5 分</span>
+        </div>
+        <div class="score-label" id="score-pct">100% 答對</div>
+      </div>
+
+      <div class="tips-box">
+        <h3>🚩 三大詐騙警訊，要記住！</h3>
+        <div class="tip-row">
+          <div class="tip-icon">💸</div>
+          <div><b>領獎前要先「付費」</b> → 一定是詐騙！真正的中獎不需要先繳任何費用。</div>
+        </div>
+        <div class="tip-row">
+          <div class="tip-icon">🔑</div>
+          <div><b>要求密碼、身分證、銀行帳號</b> → 絕對不可以給！正規公司不會這樣要求。</div>
+        </div>
+        <div class="tip-row">
+          <div class="tip-icon">🔗</div>
+          <div><b>寄件人或連結的網址很奇怪</b> → 不要點！仔細看拼字有沒有錯誤。</div>
+        </div>
+      </div>
+
+      <div class="mantra">💡 安全口訣：不確定？<br>先關掉，馬上問大人！</div>
+
+      <button class="btn-restart" onclick="restartGame()">🔄 再玩一次</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let score = 0;
+  const maxScore = 5;
+  let scene2Selected = new Set();
+  let scene2Done = false;
+
+  function updateScoreBadge() {
+    document.getElementById('score-display').textContent = '⭐ ' + score + ' 分';
+  }
+
+  function startGame() {
+    showScreen('screen-1');
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function answer(scene, idx, correct) {
+    const btns = document.querySelectorAll('#choices-' + scene + ' .choice-btn');
+    btns.forEach(b => b.disabled = true);
+    btns[idx].classList.add(correct ? 'correct' : 'wrong');
+
+    if (!correct) {
+      if (scene === 1) btns[1].classList.add('correct');
+      if (scene === 3) btns[2].classList.add('correct');
+    }
+
+    const fb = document.getElementById('feedback-' + scene);
+    fb.classList.add('show');
+
+    if (correct) {
+      score++;
+      updateScoreBadge();
+      fb.className = 'feedback show good';
+      if (scene === 1) {
+        fb.innerHTML = '✅ 答對了！「領免費獎品還要先付錢」是詐騙最常用的手法，叫做<b>「預繳費用詐騙」</b>。真正的中獎絕對不需要你先付任何錢！';
+      } else {
+        fb.innerHTML = '✅ 很棒！遇到突如其來的「中獎」視窗，第一步是<b>關掉它</b>，然後<b>告訴信任的大人</b>，不要自己做決定，更不能提供任何個人資料！';
+      }
+    } else {
+      fb.className = 'feedback show bad';
+      if (scene === 1) {
+        fb.innerHTML = '❌ 最大的警訊是：要你先付錢才能領「免費」獎品！其他選項雖然也有點可疑，但詐騙最核心的手法是<b>「要你付運費」</b>——真正的中獎絕不需要先繳費。';
+      } else {
+        fb.innerHTML = '❌ 正確答案是：<b>直接關掉視窗，告訴大人</b>。提供銀行帳號或個人資料非常危險！問同學也不夠安全，因為大家都可能被騙。';
+      }
+    }
+
+    document.getElementById('next-' + scene).classList.add('show');
+  }
+
+  function multiAnswer(idx) {
+    if (scene2Done) return;
+    const btns = document.querySelectorAll('#choices-2 .choice-btn');
+    const btn = btns[idx];
+    if (scene2Selected.has(idx)) {
+      scene2Selected.delete(idx);
+      btn.classList.remove('selected');
+    } else {
+      scene2Selected.add(idx);
+      btn.classList.add('selected');
+    }
+  }
+
+  function confirmMulti() {
+    if (scene2Done) return;
+    scene2Done = true;
+
+    const btns = document.querySelectorAll('#choices-2 .choice-btn');
+    btns.forEach(b => { b.disabled = true; b.classList.remove('selected'); });
+
+    const correctSet = new Set([0, 1, 2]);
+    let gained = 0;
+    correctSet.forEach(i => {
+      btns[i].classList.add('correct');
+      if (scene2Selected.has(i)) gained++;
+    });
+    if (scene2Selected.has(3)) {
+      btns[3].classList.add('wrong');
+      gained = Math.max(0, gained - 1);
+    }
+    gained = Math.min(gained, 3);
+    score += gained;
+    updateScoreBadge();
+
+    const fb = document.getElementById('feedback-2');
+    fb.classList.add('show');
+
+    const allCorrect = gained === 3 && !scene2Selected.has(3);
+    if (allCorrect) {
+      fb.className = 'feedback show good';
+      fb.innerHTML = '✅ 全部找到了！三個警訊：①<b>寄件人「go0gle」用數字0假裝字母o</b>；②<b>連結網址是假的</b>；③<b>要求密碼和身分證字號</b>。這些都是釣魚詐騙的特徵，太厲害了！';
+    } else {
+      fb.className = 'feedback show bad';
+      fb.innerHTML = '❌ 這封信有三個問題：①寄件人用「<b>go0gle</b>」（0是數字）假裝是Google；②<b>連結網址也是假的</b>；③真正的公司<b>絕對不會</b>要求密碼或身分證字號！你找到了 ' + gained + ' 個。';
+    }
+
+    document.getElementById('confirm-2').style.display = 'none';
+    document.getElementById('next-2').classList.add('show');
+  }
+
+  function goScene(n) {
+    showScreen('screen-' + n);
+  }
+
+  function showResult() {
+    showScreen('screen-result');
+    const pct = Math.round(score / maxScore * 100);
+    let badge, title, msg;
+
+    if (pct >= 80) {
+      badge = '🏆'; title = '超級安全小偵探！';
+      msg = '你的網路安全意識非常強！記住：「天下沒有白吃的午餐」，遇到中獎訊息要先問大人，保護自己和家人！';
+    } else if (pct >= 50) {
+      badge = '🛡️'; title = '安全意識不錯！';
+      msg = '你已經了解一些詐騙手法了！繼續練習，你會成為保護家人的小英雄！';
+    } else {
+      badge = '📚'; title = '再練習一下！';
+      msg = '詐騙手法很狡猾，但你已經開始學習了。記得：收到中獎通知，一定要先問爸媽或老師！';
+    }
+
+    document.getElementById('result-badge').textContent = badge;
+    document.getElementById('result-title').textContent = title;
+    document.getElementById('result-msg').textContent = msg;
+    document.getElementById('score-num').textContent = score;
+    document.getElementById('score-denom').textContent = ' / ' + maxScore + ' 分';
+    document.getElementById('score-pct').textContent = pct + '% 正確率';
+  }
+
+  function restartGame() {
+    score = 0;
+    scene2Selected = new Set();
+    scene2Done = false;
+    updateScoreBadge();
+
+    document.querySelectorAll('.choice-btn').forEach(b => {
+      b.disabled = false;
+      b.className = 'choice-btn';
+    });
+    document.querySelectorAll('.feedback').forEach(f => {
+      f.className = 'feedback';
+      f.innerHTML = '';
+    });
+    document.querySelectorAll('.btn-next').forEach(b => b.classList.remove('show'));
+    const confirm2 = document.getElementById('confirm-2');
+    if (confirm2) confirm2.style.display = 'inline-block';
+
+    showScreen('screen-start');
+  }
+</script>
+</body>
+</html>
